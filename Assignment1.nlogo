@@ -34,6 +34,8 @@ globals[
   immunity_duration
   undetected_period
   illness_duration
+  brown-turtles
+  magenta-turtles
 
 ]
 
@@ -72,86 +74,122 @@ to initialise_agents
 
   ;;Brown population
   create-turtles brown_population [
-    setxy random-float max-pxcor random-ycor
     set color yellow
     set size 1
     set antibodies 0
     set group "brown turtle"
     set infected false
+
   ]
+  set brown-turtles turtle-set (turtles with [group = "brown turtle"] )
+
+  ask brown-turtles [
+    while [(any? other turtles-on patch-here) = true] [
+      setxy random 26 random-ycor
+    ]
+  ]
+
 
   ;;Magenta population
   create-turtles magenta_population [
-    setxy random-float min-pxcor random-ycor
+
     set color green
     set size 1
     set antibodies 0
     set group "magenta turtle"
     set infected false
   ]
+  set magenta-turtles turtle-set (turtles with [group = "magenta turtle"] )
 
-  ask turtles [
-    ask n-of initially_infected (turtles with[group = "brown turtle"]) [
-      set infected true
+  ask magenta-turtles [
+    while [(any? other turtles-on patch-here) = true] [
+      setxy random -26 random-ycor
     ]
-    ask n-of initially_infected (turtles with[group = "brown turtle"]) [
-      set infected true
+    if xcor = 0 [
+      setxy random -26 random-ycor
     ]
   ]
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;Infect <initially_infected> number of turtles in each population
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ask (n-of initially_infected brown-turtles) [
+      set infected true
+    ]
+    ask n-of initially_infected magenta-turtles [
+      set infected true
+    ]
 end
 
 to run_model
   travel_movement
+  move
 
-;  if (any? other turtles-on patch
 
   tick
 end
 
 to move
-  right random 20
-  left random 20
-  forward 0.2
-
+  ask turtles [
+    ifelse (random 2) = 1 [
+      right random 20
+    ][
+      left random 20
+    ]
+    forward 0.2
+  ]
 end
 
 to travel_movement
   ask turtles [
-    ifelse (travel_restrictions = true) [
-      let brown-turtles turtle-set (turtles with [group = "brown turtle"] )
+    if (travel_restrictions = true) [
       ask brown-turtles [
-        if pcolor = magenta [
-        set heading 315
-        move
-      ]]
-
-        let magenta-turtles turtle-set (turtles with [group = "magenta turtle"] )
-        ask magenta-turtles [
-          if pcolor = brown [
-            set heading 45
-           move
-      ]
+        if xcor <= 0 [
+          ifelse xcor > -13 [
+          set heading 90
+          ][
+            set heading 270
+          ]
         ]
-    ][
-      move
-    ]
+        if xcor >= 25 [
+          set heading 270
+          ]
+      ]
 
+
+        ask magenta-turtles [
+          if xcor >= -1 [
+          ifelse xcor < 13 [
+            set heading 270
+          ][
+            set heading 90
+          ]
+        ]
+      if xcor <= -25 [
+        set heading 90
+        ]
+    ]
   ]
+  ]
+
 end
 
-;to social_distance
-;;  ask turtles [
-;    ifelse (social_distancing = true)[
-;      while [ (n-of other turtles-on patch-ahead 1) != nobody ] [
-;      right random 45
-;      left random 45
-;      move
-;    ]
-;    ]
-;    [ move ]
-;;  ]
-;
-;end
+to social_distance
+  ask turtles [
+    if (social_distancing = true)[
+      if ( (any? other turtles-on patch-ahead 1) != nobody)  [
+        show ("1 turtle")
+        ifelse random 2 = 1 [
+          right random 45
+        ][
+          left random 45
+        ]
+    ]
+    ]
+  ]
+  travel_movement
+end
 
 ;to isolate
 ;  ask turtles [
@@ -295,7 +333,7 @@ SWITCH
 308
 travel_restrictions
 travel_restrictions
-0
+1
 1
 -1000
 
