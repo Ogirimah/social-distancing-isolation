@@ -59,6 +59,7 @@ to initialise_world
   set student_name "Ameer Itopa Ogirimah"
 
   ;;Set Global Variables
+  set infection_rate 5
   set survival_rate 80
   set immunity_duration 200
   set undetected_period 50
@@ -93,7 +94,7 @@ to initialise_agents
   ;;Magenta population
   create-turtles magenta_population [
 
-    set color green
+    set color yellow ;;;;;;;;;;----------------
     set size 1
     set antibodies 0
     set group "magenta turtle"
@@ -123,10 +124,22 @@ to initialise_agents
 end
 
 to run_model
-  travel_movement
-  move
+  ask turtles [
+    ifelse self_isolation = false [
+    if infected = true [
+      set color red
+    ]
+    let my-neighbours (other turtles) in-radius 1
+      if (any? my-neighbours with [color = red] and ((random 101) > infection_rate )) [
+      set color red
+      set infected_time illness_duration
+      ]
 
-
+  social_distance
+      ][
+        set color orange
+      ]
+    ]
   tick
 end
 
@@ -142,8 +155,8 @@ to move
 end
 
 to travel_movement
-  ask turtles [
-    if (travel_restrictions = true) [
+  ifelse (travel_restrictions = true) [
+    ask turtles [
       ask brown-turtles [
         if xcor <= 0 [
           ifelse xcor > -13 [
@@ -171,32 +184,40 @@ to travel_movement
         ]
     ]
   ]
+    forward 0.2
+  ][
+    move
   ]
 
 end
 
 to social_distance
-  ask turtles [
-    if (social_distancing = true)[
+  ifelse (social_distancing = true) [
+    ask turtles [
       if ( (any? other turtles-on patch-ahead 1) != nobody)  [
-        show ("1 turtle")  ;;;---------------------
         ifelse random 2 = 1 [
           right random 45
+          forward 0.2
         ][
           left random 45
+          forward 0.2
         ]
     ]
     ]
+  ][
+    travel_movement
   ]
-  travel_movement
 end
 
-;to isolate
-;  ask turtles [
-;    ifelse (self_isolation = true) [
-;      set infection_time
-;      if ( infection_time >=
-;end
+to isolate
+  if (self_isolation = true) [
+    ask turtles [
+      set color orange
+;      set
+      ;; Stop moving
+  ]]
+
+end
 
 ;;To-do
 ; Fix the overlap of brown and magenta turtles at xcor = 0
