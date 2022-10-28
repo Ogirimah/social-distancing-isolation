@@ -179,7 +179,7 @@ to social_distance
   ask turtles [
     if (social_distancing = true)[
       if ( (any? other turtles-on patch-ahead 1) != nobody)  [
-        show ("1 turtle")
+        show ("1 turtle")  ;;;---------------------
         ifelse random 2 = 1 [
           right random 45
         ][
