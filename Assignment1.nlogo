@@ -37,6 +37,12 @@ globals[
   brown-turtles
   magenta-turtles
 
+  ;;;;;;;;;;;;;;;;;;;
+  current-brown-turtles
+  current-magenta-turtles
+  current-total-population
+  total_infected
+
 ]
 
 turtles-own[
@@ -159,15 +165,19 @@ to run_model
       ]
   ]
   ]
+  set current-brown-turtles (count brown-turtles)
+  set current-magenta-turtles (count magenta-turtles)
+  set current-total-population (current-brown-turtles + current-magenta-turtles)
+
   let total_population (brown_population + magenta_population)
-  let total_infected (count (turtles with [ infected = true ]) )
-  set total_infected_percentage ((total_infected / total_population) * 100 )
+  set total_infected (count (turtles with [ infected = true ]) )
+  set total_infected_percentage ((total_infected / current-total-population) * 100 )
 
   let brown_infected (count (brown-turtles with [infected = true]))
-  set brown_infected_percentage ((brown_infected / brown_population) * 100 )
+  set brown_infected_percentage ((brown_infected / current-brown-turtles) * 100 )
 
   let magenta_infected (count (magenta-turtles with [infected = true]))
-  set magenta_infected_percentage ((magenta_infected / magenta_population) * 100 )
+  set magenta_infected_percentage ((magenta_infected / current-magenta-turtles) * 100 )
 
   set total_deaths (total_population - (count turtles))
 
@@ -176,13 +186,13 @@ to run_model
   set magenta_deaths (magenta_population - (count magenta-turtles))
 
   let total_antibodies (count turtles with [antibodies = true])
-  set total_antibodies_percentage ((total_antibodies / total_population) * 100 )
+  set total_antibodies_percentage ((total_antibodies / current-total-population) * 100 )
 
   let brown_antibodies (count brown-turtles with [antibodies = true])
-  set brown_antibodies_percentage ((brown_antibodies / brown-turtles) * 100 )
+  set brown_antibodies_percentage ((brown_antibodies / current-brown-turtles) * 100 )
 
   let magenta_antibodies (count magenta-turtles with [antibodies = true])
-  set brown_antibodies_percentage ((magenta_antibodies / magenta-turtles) * 100 )
+  set magenta_antibodies_percentage ((magenta_antibodies / current-magenta-turtles) * 100 )
 
 end
 
@@ -271,13 +281,22 @@ to isolate
 
 end
 
+to my_analysis
+  set most_effective_measure 0
+  set least_effective_measure 0
+  set population_most_affected 0
+  set population_most_immune 0
+  set self_isolation_link 0
+  set population_density 0
+end
+
 ;;To-do
 ;
 @#$#@#$#@
 GRAPHICS-WINDOW
-277
+200
 10
-795
+718
 529
 -1
 -1
@@ -302,10 +321,10 @@ ticks
 30.0
 
 SLIDER
-5
-97
-177
-130
+0
+110
+172
+143
 brown_population
 brown_population
 0
@@ -317,9 +336,9 @@ NIL
 HORIZONTAL
 
 SLIDER
-4
+0
 144
-184
+180
 177
 magenta_population
 magenta_population
@@ -332,10 +351,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-5
-198
-177
-231
+0
+179
+172
+212
 initially_infected
 initially_infected
 0
@@ -347,10 +366,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-6
-14
-130
-47
+0
+10
+124
+43
 initialise_world
 initialise_world
 NIL
@@ -364,10 +383,10 @@ NIL
 1
 
 BUTTON
-138
-14
-269
-47
+0
+44
+131
+77
 initialise_agents
 initialise_agents
 NIL
@@ -381,10 +400,10 @@ NIL
 1
 
 BUTTON
-67
-58
-165
-91
+0
+77
+98
+110
 run_model
 run_model
 T
@@ -398,10 +417,10 @@ NIL
 0
 
 SWITCH
-45
-275
-215
-308
+0
+214
+170
+247
 travel_restrictions
 travel_restrictions
 1
@@ -409,10 +428,10 @@ travel_restrictions
 -1000
 
 SWITCH
-48
-343
-212
-376
+0
+249
+164
+282
 social_distancing
 social_distancing
 1
@@ -420,10 +439,10 @@ social_distancing
 -1000
 
 SWITCH
-56
-407
-195
-440
+0
+285
+139
+318
 self_isolation
 self_isolation
 1
@@ -431,10 +450,10 @@ self_isolation
 -1000
 
 MONITOR
-810
-19
-983
-64
+721
+58
+872
+103
 NIL
 total_infected_percentage
 17
@@ -442,10 +461,10 @@ total_infected_percentage
 11
 
 MONITOR
-809
-73
-994
-118
+874
+58
+1037
+103
 NIL
 brown_infected_percentage
 17
@@ -453,10 +472,10 @@ brown_infected_percentage
 11
 
 MONITOR
-814
-128
-903
-173
+721
+10
+810
+55
 NIL
 total_deaths
 17
@@ -464,10 +483,10 @@ total_deaths
 11
 
 MONITOR
-817
-184
-918
-229
+811
+10
+912
+55
 NIL
 brown_deaths
 17
@@ -475,10 +494,10 @@ brown_deaths
 11
 
 MONITOR
-813
-236
-927
-281
+913
+10
+1027
+55
 NIL
 magenta_deaths
 17
@@ -486,15 +505,130 @@ magenta_deaths
 11
 
 MONITOR
-813
-287
-1001
-332
+721
+105
+885
+150
 NIL
 total_antibodies_percentage
 17
 1
 11
+
+MONITOR
+886
+105
+1060
+150
+NIL
+brown_antibodies_percentage
+17
+1
+11
+
+MONITOR
+1062
+105
+1247
+150
+NIL
+magenta_antibodies_percentage
+17
+1
+11
+
+MONITOR
+1039
+58
+1211
+103
+NIL
+magenta_infected_percentage
+17
+1
+11
+
+MONITOR
+721
+153
+810
+198
+Active cases
+count (turtles with [ infected = true ])
+17
+1
+11
+
+MONITOR
+811
+153
+906
+198
+Count turtles
+(count brown-turtles) + (count magenta-turtles)
+17
+1
+11
+
+MONITOR
+908
+153
+1060
+198
+Current brown population
+count brown-turtles
+17
+1
+11
+
+MONITOR
+1062
+154
+1227
+199
+Current magenta population
+count magenta-turtles
+17
+1
+11
+
+PLOT
+720
+201
+1289
+421
+Populations
+Total population
+Current population
+0.0
+600.0
+0.0
+600.0
+true
+true
+"" ""
+PENS
+"brown population" 1.0 0 -6459832 true "" "plot current-brown-turtles"
+"magenta population" 1.0 0 -5825686 true "" "plot current-magenta-turtles"
+
+PLOT
+720
+424
+1288
+630
+Population
+Hours
+Number of People
+0.0
+1000.0
+0.0
+10000.0
+true
+true
+"" ""
+PENS
+"Infected" 1.0 0 -2674135 true "" "plot total_infected_percentage"
+"Immune" 1.0 0 -16777216 true "" "plot (((current-total-population - total_infected) / curent-total-population) * 100 )"
 
 @#$#@#$#@
 ## WHAT IS IT?
