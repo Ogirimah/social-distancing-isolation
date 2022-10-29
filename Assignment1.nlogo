@@ -117,45 +117,70 @@ to initialise_agents
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     ask (n-of initially_infected brown-turtles) [
       set infected true
+      set infected_time illness_duration
+      set color red
     ]
     ask n-of initially_infected magenta-turtles [
       set infected true
+      set infected_time illness_duration
+      set color red
     ]
 end
 
 to run_model
   ask turtles [
+    social_distance
     ifelse self_isolation = false [
-    if infected = true [
-      set color red
-      set infected_time illness_duration
+
+      if (color = yellow) [
+      let my-neighbours (other turtles) in-radius 1
+      if (any? my-neighbours with [color = red]) [
+        if (random 101) <= infection_rate  [
+        set infected true
+        set color red
+        set infected_time illness_duration
+      ]
     ]
-    let my-neighbours (other turtles) in-radius 1
-    if (any? my-neighbours with [color = red] and ((random 101) <= infection_rate )) [
-    set color red
-    set infected_time illness_duration
     ]
-social_distance
     ][
-      set color orange
+      social_distance
     ]
   ]
   tick
-  ask turtles with [(color = red) or (color = orange)] [
+  ask turtles with [infected = true] [
     set infected_time (infected_time - 1)
+    if infected_time = 0 [
+     ifelse random 101 > survival_rate [
+        die
+    ][
+       set infected false
+       set antibodies true
+       set color black
+      ]
   ]
+  ]
+  let total_infected (count (turtles with [ infected = true ]) )
+  set total_infected_percentage (((total_infected) / (brown_population + magenta_population)) * 100 )
+
+  let brown_infected (count (brown-turtles with [infected = true]))
+  set brown_infected_percentage ((brown_infected / brown_population) * 100 )
+
+  let magenta_infected (count (magenta-turtles with [infected = true]))
+  set magenta_infected_percentage ((magenta_infected / magenta_population) * 100 )
+
+
 end
 
 to move
 
-  ifelse ( (any? other turtles-on patch-ahead 1) )  [
-      ifelse random 2 = 1 [
-        right random 45
-      ][
-        left random 45
-      ]
-    forward 0.2
-  ][
+;  ifelse ( (any? other turtles-on patch-ahead 1) )  [
+;      ifelse random 2 = 1 [
+;        right random 45
+;      ][
+;        left random 45
+;      ]
+;    forward 0.2
+;  ][
 
   ifelse (random 2) = 1 [
     right random 20
@@ -163,7 +188,7 @@ to move
     left random 20
   ]
   forward 0.2
-  ]
+;  ]
 end
 
 to travel_movement
@@ -205,16 +230,16 @@ end
 
 to social_distance
   ifelse (social_distancing = true) [
-    if ( any? other turtles-on patch-ahead 1 ) or ( any? other turtles-on patch-ahead 2 ) [
+    ifelse ( any? other turtles-on patch-ahead 1 )[
       ifelse random 2 = 1 [
         right random 45
       ][
         left random 45
       ]
     forward 0.2
+    ][
+      travel_movement
     ]
-
-
   ][
     travel_movement
   ]
@@ -284,7 +309,7 @@ SLIDER
 magenta_population
 magenta_population
 0
-500
+1000
 250.0
 1
 1
@@ -389,6 +414,28 @@ self_isolation
 1
 1
 -1000
+
+MONITOR
+810
+19
+983
+64
+NIL
+total_infected_percentage
+17
+1
+11
+
+MONITOR
+809
+73
+994
+118
+NIL
+brown_infected_percentage
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
