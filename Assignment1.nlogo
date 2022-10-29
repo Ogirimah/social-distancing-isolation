@@ -159,8 +159,9 @@ to run_model
       ]
   ]
   ]
+  let total_population (brown_population + magenta_population)
   let total_infected (count (turtles with [ infected = true ]) )
-  set total_infected_percentage (((total_infected) / (brown_population + magenta_population)) * 100 )
+  set total_infected_percentage ((total_infected / total_population) * 100 )
 
   let brown_infected (count (brown-turtles with [infected = true]))
   set brown_infected_percentage ((brown_infected / brown_population) * 100 )
@@ -168,6 +169,20 @@ to run_model
   let magenta_infected (count (magenta-turtles with [infected = true]))
   set magenta_infected_percentage ((magenta_infected / magenta_population) * 100 )
 
+  set total_deaths (total_population - (count turtles))
+
+  set brown_deaths (brown_population - (count brown-turtles))
+
+  set magenta_deaths (magenta_population - (count magenta-turtles))
+
+  let total_antibodies (count turtles with [antibodies = true])
+  set total_antibodies_percentage ((total_antibodies / total_population) * 100 )
+
+  let brown_antibodies (count brown-turtles with [antibodies = true])
+  set brown_antibodies_percentage ((brown_antibodies / brown-turtles) * 100 )
+
+  let magenta_antibodies (count magenta-turtles with [antibodies = true])
+  set brown_antibodies_percentage ((magenta_antibodies / magenta-turtles) * 100 )
 
 end
 
@@ -433,6 +448,50 @@ MONITOR
 118
 NIL
 brown_infected_percentage
+17
+1
+11
+
+MONITOR
+814
+128
+903
+173
+NIL
+total_deaths
+17
+1
+11
+
+MONITOR
+817
+184
+918
+229
+NIL
+brown_deaths
+17
+1
+11
+
+MONITOR
+813
+236
+927
+281
+NIL
+magenta_deaths
+17
+1
+11
+
+MONITOR
+813
+287
+1001
+332
+NIL
+total_antibodies_percentage
 17
 1
 11
