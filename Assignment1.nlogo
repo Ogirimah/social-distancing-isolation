@@ -72,7 +72,7 @@ end
 
 ;;Agents Setup
 to initialise_agents
-
+  clear-turtles
   ;;Brown population
   create-turtles brown_population [
     set color yellow
@@ -128,35 +128,47 @@ to run_model
     ifelse self_isolation = false [
     if infected = true [
       set color red
+      set infected_time illness_duration
     ]
     let my-neighbours (other turtles) in-radius 1
-      if (any? my-neighbours with [color = red] and ((random 101) > infection_rate )) [
-      set color red
-      set infected_time illness_duration
-      ]
-
-  social_distance
-      ][
-        set color orange
-      ]
+    if (any? my-neighbours with [color = red] and ((random 101) <= infection_rate )) [
+    set color red
+    set infected_time illness_duration
     ]
+social_distance
+    ][
+      set color orange
+    ]
+  ]
   tick
+  ask turtles with [(color = red) or (color = orange)] [
+    set infected_time (infected_time - 1)
+  ]
 end
 
 to move
-  ask turtles [
-    ifelse (random 2) = 1 [
-      right random 20
-    ][
-      left random 20
-    ]
+
+  ifelse ( (any? other turtles-on patch-ahead 1) )  [
+      ifelse random 2 = 1 [
+        right random 45
+      ][
+        left random 45
+      ]
     forward 0.2
+  ][
+
+  ifelse (random 2) = 1 [
+    right random 20
+  ][
+    left random 20
+  ]
+  forward 0.2
   ]
 end
 
 to travel_movement
   ifelse (travel_restrictions = true) [
-    ask turtles [
+
       ask brown-turtles [
         if xcor <= 0 [
           ifelse xcor > -13 [
@@ -183,8 +195,8 @@ to travel_movement
         set heading 90
         ]
     ]
-  ]
-    forward 0.2
+
+    move
   ][
     move
   ]
@@ -193,17 +205,16 @@ end
 
 to social_distance
   ifelse (social_distancing = true) [
-    ask turtles [
-      if ( (any? other turtles-on patch-ahead 1) != nobody)  [
-        ifelse random 2 = 1 [
-          right random 45
-          forward 0.2
-        ][
-          left random 45
-          forward 0.2
-        ]
+    if ( any? other turtles-on patch-ahead 1 ) or ( any? other turtles-on patch-ahead 2 ) [
+      ifelse random 2 = 1 [
+        right random 45
+      ][
+        left random 45
+      ]
+    forward 0.2
     ]
-    ]
+
+
   ][
     travel_movement
   ]
@@ -212,17 +223,16 @@ end
 to isolate
   if (self_isolation = true) [
     ask turtles [
-      set color orange
-;      set
-      ;; Stop moving
-  ]]
+      if infected_time = (illness_duration - undetected_period) [
+        set color orange
+      ]
+    ]
+  ]
 
 end
 
 ;;To-do
-; Fix the overlap of brown and magenta turtles at xcor = 0
-
-;Set speed to 0.2 per step
+;
 @#$#@#$#@
 GRAPHICS-WINDOW
 277
