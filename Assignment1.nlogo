@@ -94,7 +94,7 @@ to initialise_agents
   ;;Magenta population
   create-turtles magenta_population [
 
-    set color yellow ;;;;;;;;;;----------------
+    set color green
     set size 1
     set antibodies 0
     set group "magenta turtle"
