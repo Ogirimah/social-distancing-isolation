@@ -42,6 +42,7 @@ globals[
   current-magenta-turtles
   current-total-population
   total_infected
+  total_immune
 
 ]
 
@@ -52,11 +53,12 @@ turtles-own[
 
 ;  Run-time Variables
   infected
+  immune
 ]
 
 ;World Setup
 to initialise_world
-  clear-turtles
+
   ask patches [
     ifelse pxcor >= 0 [set pcolor  brown ]
     [ set pcolor magenta ]
@@ -135,7 +137,7 @@ end
 
 to run_model
   ask turtles [
-    social_distance
+    isolate
     ifelse self_isolation = false [
 
       if (color = yellow) [
@@ -161,10 +163,20 @@ to run_model
     ][
        set infected false
        set antibodies true
+       set immune immunity_duration
        set color black
       ]
   ]
   ]
+
+  ask turtles with [antibodies = true] [
+    set immune ( immune - 1 )
+    if immune = 0 [
+      set antibodies false
+      set color yellow
+    ]
+  ]
+
   set current-brown-turtles (count brown-turtles)
   set current-magenta-turtles (count magenta-turtles)
   set current-total-population (current-brown-turtles + current-magenta-turtles)
@@ -193,6 +205,8 @@ to run_model
 
   let magenta_antibodies (count magenta-turtles with [antibodies = true])
   set magenta_antibodies_percentage ((magenta_antibodies / current-magenta-turtles) * 100 )
+
+  set total_immune (count (turtles with [antibodies = true] ) )
 
 end
 
@@ -271,12 +285,16 @@ to social_distance
 end
 
 to isolate
-  if (self_isolation = true) [
-    ask turtles [
-      if infected_time = (illness_duration - undetected_period) [
-        set color orange
-      ]
+  ifelse (self_isolation = true) [
+
+    ifelse infected_time = (illness_duration - undetected_period) [
+      set color orange
+    ][
+      social_distance
     ]
+
+  ][
+    social_distance
   ]
 
 end
@@ -294,9 +312,9 @@ end
 ;
 @#$#@#$#@
 GRAPHICS-WINDOW
-200
+178
 10
-718
+696
 529
 -1
 -1
@@ -445,14 +463,14 @@ SWITCH
 318
 self_isolation
 self_isolation
-1
+0
 1
 -1000
 
 MONITOR
-721
+701
 58
-872
+852
 103
 NIL
 total_infected_percentage
@@ -461,9 +479,9 @@ total_infected_percentage
 11
 
 MONITOR
-874
+854
 58
-1037
+1017
 103
 NIL
 brown_infected_percentage
@@ -472,9 +490,9 @@ brown_infected_percentage
 11
 
 MONITOR
-721
+701
 10
-810
+790
 55
 NIL
 total_deaths
@@ -483,9 +501,9 @@ total_deaths
 11
 
 MONITOR
-811
+791
 10
-912
+892
 55
 NIL
 brown_deaths
@@ -494,9 +512,9 @@ brown_deaths
 11
 
 MONITOR
-913
+893
 10
-1027
+1007
 55
 NIL
 magenta_deaths
@@ -505,9 +523,9 @@ magenta_deaths
 11
 
 MONITOR
-721
+701
 105
-885
+865
 150
 NIL
 total_antibodies_percentage
@@ -516,9 +534,9 @@ total_antibodies_percentage
 11
 
 MONITOR
-886
+866
 105
-1060
+1040
 150
 NIL
 brown_antibodies_percentage
@@ -527,9 +545,9 @@ brown_antibodies_percentage
 11
 
 MONITOR
-1062
+1042
 105
-1247
+1227
 150
 NIL
 magenta_antibodies_percentage
@@ -538,9 +556,9 @@ magenta_antibodies_percentage
 11
 
 MONITOR
-1039
+1019
 58
-1211
+1191
 103
 NIL
 magenta_infected_percentage
@@ -549,9 +567,9 @@ magenta_infected_percentage
 11
 
 MONITOR
-721
+701
 153
-810
+790
 198
 Active cases
 count (turtles with [ infected = true ])
@@ -560,9 +578,9 @@ count (turtles with [ infected = true ])
 11
 
 MONITOR
-811
+791
 153
-906
+886
 198
 Count turtles
 (count brown-turtles) + (count magenta-turtles)
@@ -571,9 +589,9 @@ Count turtles
 11
 
 MONITOR
-908
+888
 153
-1060
+1040
 198
 Current brown population
 count brown-turtles
@@ -582,9 +600,9 @@ count brown-turtles
 11
 
 MONITOR
-1062
+1042
 154
-1227
+1207
 199
 Current magenta population
 count magenta-turtles
@@ -593,42 +611,42 @@ count magenta-turtles
 11
 
 PLOT
-720
+700
 201
-1289
+1269
 421
 Populations
-Total population
-Current population
+Hours
+Number of People
 0.0
 600.0
 0.0
 600.0
 true
 true
-"" ""
+"clear-plot" ""
 PENS
 "brown population" 1.0 0 -6459832 true "" "plot current-brown-turtles"
 "magenta population" 1.0 0 -5825686 true "" "plot current-magenta-turtles"
 
 PLOT
-720
+700
 424
-1288
+1268
 630
 Population
 Hours
 Number of People
 0.0
-1000.0
+500.0
 0.0
-10000.0
+750.0
 true
 true
-"" ""
+"clear-plot" ""
 PENS
-"Infected" 1.0 0 -2674135 true "" "plot total_infected_percentage"
-"Immune" 1.0 0 -16777216 true "" "plot (((current-total-population - total_infected) / curent-total-population) * 100 )"
+"Infected" 1.0 0 -2674135 true "" "plot total_infected"
+"Immune" 1.0 0 -16777216 true "" "plot total_immune"
 
 @#$#@#$#@
 ## WHAT IS IT?
