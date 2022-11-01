@@ -72,9 +72,9 @@ to initialise_world
   set immunity_duration 200
   set undetected_period 50
   set illness_duration 200
-  set travel_restrictions false
-  set social_distancing false
-  set self_isolation false
+;  set travel_restrictions false
+;  set social_distancing false
+;  set self_isolation false
   reset-ticks
 end
 
@@ -102,7 +102,7 @@ to initialise_agents
   ;;Magenta population
   create-turtles magenta_population [
 
-    set color yellow ;;;;;;;;;;----------------
+    set color yellow
     set size 1
     set antibodies 0
     set group "magenta turtle"
@@ -154,7 +154,9 @@ to run_model
       social_distance
     ]
   ]
+
   tick
+
   ask turtles with [infected = true] [
     set infected_time (infected_time - 1)
     if infected_time = 0 [
@@ -309,7 +311,9 @@ to my_analysis
 end
 
 ;;To-do
-;
+;Randomize heading in travel restriction after setting 90 and 270
+
+;Check if agent infection is based on probability of infection
 @#$#@#$#@
 GRAPHICS-WINDOW
 178
@@ -441,7 +445,7 @@ SWITCH
 247
 travel_restrictions
 travel_restrictions
-1
+0
 1
 -1000
 
@@ -463,7 +467,7 @@ SWITCH
 318
 self_isolation
 self_isolation
-0
+1
 1
 -1000
 
