@@ -314,6 +314,9 @@ end
 ;Randomize heading in travel restriction after setting 90 and 270
 
 ;Check if agent infection is based on probability of infection
+
+;Agent that can infect agent should be red alone, since orange agent is self isolating
+;So Do not use infected agent, use inly red agent to infect
 @#$#@#$#@
 GRAPHICS-WINDOW
 178
@@ -445,7 +448,7 @@ SWITCH
 247
 travel_restrictions
 travel_restrictions
-0
+1
 1
 -1000
 
@@ -467,7 +470,7 @@ SWITCH
 318
 self_isolation
 self_isolation
-1
+0
 1
 -1000
 
