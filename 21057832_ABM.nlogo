@@ -180,6 +180,11 @@ end
 to travel_movement
   ifelse (travel_restrictions = true) [
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ; Each population is directed to their home patch using the shortest distance in the
+  ;  X-axis, while considering that the world wraps
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
       ask brown-turtles [
         if xcor <= 0 [
           ifelse xcor > -13 [
@@ -257,6 +262,12 @@ to set_vulnerable
 end
 
 to set_isolate
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;  For a total turtle to isolate, it just has to change color
+  ;  to orange and do nothing else
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
   ask turtles with [infected = true] [
     if self_isolation [
     let sick_time (illness_duration - undetected_period)
