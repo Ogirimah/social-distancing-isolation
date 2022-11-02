@@ -29,11 +29,11 @@ globals[
   stored_settings
 
   ;;Student defined variables
-  infection_rate
-  survival_rate
-  immunity_duration
-  undetected_period
-  illness_duration
+;  infection_rate
+;  survival_rate
+;  immunity_duration
+;  undetected_period
+;  illness_duration
   brown-turtles
   magenta-turtles
 
@@ -72,9 +72,7 @@ to initialise_world
   set immunity_duration 200
   set undetected_period 50
   set illness_duration 200
-;  set travel_restrictions false
-;  set social_distancing false
-;  set self_isolation false
+
   reset-ticks
 end
 
@@ -136,9 +134,11 @@ to initialise_agents
 end
 
 to run_model
+
   ask turtles [
-    isolate
-    ifelse self_isolation = false [
+    ifelse color = orange [
+
+    ] [
 
       if (color = yellow) [
       let my-neighbours (other turtles) in-radius 1
@@ -150,13 +150,87 @@ to run_model
       ]
     ]
     ]
-    ][
       social_distance
     ]
   ]
 
   tick
 
+  become_immune
+
+  set_vulnerable
+
+  set_isolate
+
+  report_result
+
+end
+
+to move_forward
+
+  ifelse (random 2) = 1 [
+    right random 20
+  ][
+    left random 20
+  ]
+  forward 0.2
+
+end
+
+to travel_movement
+  ifelse (travel_restrictions = true) [
+
+      ask brown-turtles [
+        if xcor <= 0 [
+          ifelse xcor > -13 [
+          set heading 90
+          ][
+            set heading 270
+          ]
+        ]
+        if xcor >= 25 [
+          set heading 270
+          ]
+      ]
+
+        ask magenta-turtles [
+          if xcor >= -1 [
+          ifelse xcor < 13 [
+            set heading 270
+          ][
+            set heading 90
+          ]
+        ]
+      if xcor <= -25 [
+        set heading 90
+        ]
+    ]
+
+    move_forward
+  ][
+    move_forward
+  ]
+
+end
+
+to social_distance
+  ifelse (social_distancing = true) [
+    ifelse ( any? other turtles-on patch-ahead 1 )[
+      ifelse random 2 = 1 [
+        right random 45
+      ][
+        left random 45
+      ]
+    forward 0.2
+    ][
+      travel_movement
+    ]
+  ][
+    travel_movement
+  ]
+end
+
+to become_immune
   ask turtles with [infected = true] [
     set infected_time (infected_time - 1)
     if infected_time = 0 [
@@ -170,7 +244,9 @@ to run_model
       ]
   ]
   ]
+end
 
+to set_vulnerable
   ask turtles with [antibodies = true] [
     set immune ( immune - 1 )
     if immune = 0 [
@@ -178,7 +254,20 @@ to run_model
       set color yellow
     ]
   ]
+end
 
+to set_isolate
+  ask turtles with [infected = true] [
+    if self_isolation [
+    let sick_time (illness_duration - undetected_period)
+    if infected_time <= sick_time [
+      set color orange
+    ]
+    ]
+  ]
+end
+
+to report_result
   set current-brown-turtles (count brown-turtles)
   set current-magenta-turtles (count magenta-turtles)
   set current-total-population (current-brown-turtles + current-magenta-turtles)
@@ -209,119 +298,24 @@ to run_model
   set magenta_antibodies_percentage ((magenta_antibodies / current-magenta-turtles) * 100 )
 
   set total_immune (count (turtles with [antibodies = true] ) )
-
 end
 
-to move
-
-;  ifelse ( (any? other turtles-on patch-ahead 1) )  [
-;      ifelse random 2 = 1 [
-;        right random 45
-;      ][
-;        left random 45
-;      ]
-;    forward 0.2
-;  ][
-
-  ifelse (random 2) = 1 [
-    right random 20
-  ][
-    left random 20
-  ]
-  forward 0.2
-;  ]
-end
-
-to travel_movement
-  ifelse (travel_restrictions = true) [
-
-      ask brown-turtles [
-        if xcor <= 0 [
-          ifelse xcor > -13 [
-          set heading 90
-          ][
-            set heading 270
-          ]
-        ]
-        if xcor >= 25 [
-          set heading 270
-          ]
-      ]
-
-
-        ask magenta-turtles [
-          if xcor >= -1 [
-          ifelse xcor < 13 [
-            set heading 270
-          ][
-            set heading 90
-          ]
-        ]
-      if xcor <= -25 [
-        set heading 90
-        ]
-    ]
-
-    move
-  ][
-    move
-  ]
-
-end
-
-to social_distance
-  ifelse (social_distancing = true) [
-    ifelse ( any? other turtles-on patch-ahead 1 )[
-      ifelse random 2 = 1 [
-        right random 45
-      ][
-        left random 45
-      ]
-    forward 0.2
-    ][
-      travel_movement
-    ]
-  ][
-    travel_movement
-  ]
-end
-
-to isolate
-  ifelse (self_isolation = true) [
-
-    ifelse infected_time = (illness_duration - undetected_period) [
-      set color orange
-    ][
-      social_distance
-    ]
-
-  ][
-    social_distance
-  ]
-
-end
 
 to my_analysis
-  set most_effective_measure 0
-  set least_effective_measure 0
-  set population_most_affected 0
-  set population_most_immune 0
-  set self_isolation_link 0
-  set population_density 0
+  set most_effective_measure 2
+  set least_effective_measure 3
+  set population_most_affected 1
+  set population_most_immune 1
+  set self_isolation_link 5
+  set population_density 5
 end
 
 ;;To-do
-;Randomize heading in travel restriction after setting 90 and 270
-
-;Check if agent infection is based on probability of infection
-
-;Agent that can infect agent should be red alone, since orange agent is self isolating
-;So Do not use infected agent, use inly red agent to infect
 @#$#@#$#@
 GRAPHICS-WINDOW
-178
+194
 10
-696
+712
 529
 -1
 -1
@@ -363,7 +357,7 @@ HORIZONTAL
 SLIDER
 0
 144
-180
+174
 177
 magenta_population
 magenta_population
@@ -443,9 +437,9 @@ NIL
 
 SWITCH
 0
-214
+421
 170
-247
+454
 travel_restrictions
 travel_restrictions
 1
@@ -454,9 +448,9 @@ travel_restrictions
 
 SWITCH
 0
-249
+456
 164
-282
+489
 social_distancing
 social_distancing
 1
@@ -465,19 +459,19 @@ social_distancing
 
 SWITCH
 0
-285
+492
 139
-318
+525
 self_isolation
 self_isolation
-0
+1
 1
 -1000
 
 MONITOR
-701
+715
 58
-852
+866
 103
 NIL
 total_infected_percentage
@@ -486,9 +480,9 @@ total_infected_percentage
 11
 
 MONITOR
-854
+868
 58
-1017
+1031
 103
 NIL
 brown_infected_percentage
@@ -497,9 +491,9 @@ brown_infected_percentage
 11
 
 MONITOR
-701
+715
 10
-790
+804
 55
 NIL
 total_deaths
@@ -508,9 +502,9 @@ total_deaths
 11
 
 MONITOR
-791
+805
 10
-892
+906
 55
 NIL
 brown_deaths
@@ -519,9 +513,9 @@ brown_deaths
 11
 
 MONITOR
-893
+907
 10
-1007
+1021
 55
 NIL
 magenta_deaths
@@ -530,9 +524,9 @@ magenta_deaths
 11
 
 MONITOR
-701
+715
 105
-865
+879
 150
 NIL
 total_antibodies_percentage
@@ -541,9 +535,9 @@ total_antibodies_percentage
 11
 
 MONITOR
-866
+880
 105
-1040
+1054
 150
 NIL
 brown_antibodies_percentage
@@ -552,9 +546,9 @@ brown_antibodies_percentage
 11
 
 MONITOR
-1042
+1056
 105
-1227
+1241
 150
 NIL
 magenta_antibodies_percentage
@@ -563,9 +557,9 @@ magenta_antibodies_percentage
 11
 
 MONITOR
-1019
+1033
 58
-1191
+1205
 103
 NIL
 magenta_infected_percentage
@@ -574,9 +568,9 @@ magenta_infected_percentage
 11
 
 MONITOR
-701
+715
 153
-790
+804
 198
 Active cases
 count (turtles with [ infected = true ])
@@ -585,9 +579,9 @@ count (turtles with [ infected = true ])
 11
 
 MONITOR
-791
+805
 153
-886
+900
 198
 Count turtles
 (count brown-turtles) + (count magenta-turtles)
@@ -596,9 +590,9 @@ Count turtles
 11
 
 MONITOR
-888
+902
 153
-1040
+1054
 198
 Current brown population
 count brown-turtles
@@ -607,9 +601,9 @@ count brown-turtles
 11
 
 MONITOR
-1042
+1056
 154
-1207
+1221
 199
 Current magenta population
 count magenta-turtles
@@ -618,9 +612,9 @@ count magenta-turtles
 11
 
 PLOT
-700
+714
 201
-1269
+1283
 421
 Populations
 Hours
@@ -637,9 +631,9 @@ PENS
 "magenta population" 1.0 0 -5825686 true "" "plot current-magenta-turtles"
 
 PLOT
-700
+714
 424
-1268
+1282
 630
 Population
 Hours
@@ -654,6 +648,81 @@ true
 PENS
 "Infected" 1.0 0 -2674135 true "" "plot total_infected"
 "Immune" 1.0 0 -16777216 true "" "plot total_immune"
+
+SLIDER
+0
+215
+172
+248
+infection_rate
+infection_rate
+0
+100
+5.0
+1
+1
+%
+HORIZONTAL
+
+SLIDER
+0
+250
+172
+283
+survival_rate
+survival_rate
+0
+100
+80.0
+1
+1
+%
+HORIZONTAL
+
+SLIDER
+0
+285
+188
+318
+immunity_duration
+immunity_duration
+0
+500
+200.0
+1
+1
+hours
+HORIZONTAL
+
+SLIDER
+0
+320
+177
+353
+undetected_period
+undetected_period
+0
+200
+50.0
+1
+1
+hours
+HORIZONTAL
+
+SLIDER
+0
+357
+177
+390
+illness_duration
+illness_duration
+0
+500
+200.0
+1
+1
+hours
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
